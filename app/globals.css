@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Iron Vault Token — Global Styles ── */
+
+:root {
+  --gold: #C9A84C;
+  --gold-light: #E8C77D;
+  --gold-dim: #7A6228;
+  --obsidian: #0C0C0E;
+  --vault: #111115;
+  --surface: #17171C;
+  --surface-2: #1E1E25;
+  --surface-3: #252530;
+  --border: rgba(201,168,76,0.15);
+  --border-subtle: rgba(255,255,255,0.07);
+  --text: #F0EDE6;
+  --text-muted: #8E8D98;
+  --text-dim: #5A596A;
+  --danger: #E24B4A;
+  --danger-bg: rgba(226,75,74,0.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--obsidian);
+  color: var(--text);
+  font-weight: 400;
+  line-height: 1.7;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.vault-divider {
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  margin: 0 48px;
+}
+
+.vault-section {
+  padding: 88px 48px;
+}
+
+.vault-section-inner {
+  max-width: 1060px;
+  margin: 0 auto;
+}
+
+.vault-section-label {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vault-section-label::before {
+  content: '';
+  width: 20px;
+  height: 1px;
+  background: var(--gold);
+  display: block;
+}
+
+@media (max-width: 880px) {
+  .vault-divider { margin: 0 24px; }
+  .vault-section { padding: 60px 24px; }
+
+  /* Collapse all two-column grids to single column */
+  .vault-what-grid,
+  .vault-terms-grid,
+  .vault-who-grid,
+  .vault-cta-grid,
+  .vault-risk-grid,
+  .vault-footer-top {
+    grid-template-columns: 1fr !important;
+    gap: 40px !important;
+  }
+
+  /* Footer bottom stacks vertically */
+  .vault-footer-meta {
+    text-align: left !important;
+  }
+
+  /* Nav links hidden on mobile */
+  .vault-nav-links {
+    display: none !important;
+  }
+}
