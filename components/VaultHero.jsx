@@ -337,10 +337,10 @@ export default function VaultHero() {
 
     const live = calcCountdown(LAUNCH_DATE);
     const boosted = {
-      days: live.days + 1,
-      hours: live.hours + 24,
-      minutes: live.minutes + 60,
-      seconds: live.seconds + 60,
+      days: live.days + 5,
+      hours: live.hours + (5 * 24),
+      minutes: live.minutes + (5 * 60),
+      seconds: live.seconds + (5 * 60),
     };
     const anim = { ...boosted };
 
