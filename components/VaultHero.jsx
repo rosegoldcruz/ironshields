@@ -516,36 +516,6 @@ export default function VaultHero() {
       className="relative w-full overflow-hidden"
       style={{ height: '100svh' }}
     >
-      {/* ── Starfield background (always behind doors) ── */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: 'radial-gradient(ellipse 80% 70% at 50% 40%, #14141c 0%, #0a0a0e 60%, #050507 100%)',
-          zIndex: 0,
-        }}
-      />
-      {/* Static star dots */}
-      <svg
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ zIndex: 1 }}
-        aria-hidden="true"
-      >
-        {[
-          [12,8],[34,19],[67,7],[88,14],[23,31],[45,28],[71,35],[92,22],
-          [8,52],[29,48],[56,61],[78,44],[95,58],[17,73],[40,67],[63,79],
-          [84,71],[6,86],[31,82],[58,91],[76,85],[90,78],[48,15],[82,53],
-          [3,40],[19,64],[72,25],[97,41],[53,5],[37,95],
-        ].map(([cx, cy], i) => (
-          <circle
-            key={i}
-            cx={`${cx}%`}
-            cy={`${cy}%`}
-            r={i % 5 === 0 ? 1.5 : 0.8}
-            fill={`rgba(255,255,255,${i % 5 === 0 ? 0.35 : 0.15})`}
-          />
-        ))}
-      </svg>
-
       {/* ── Ambient floor glow ── */}
       <div
         className="absolute bottom-0 left-0 right-0 pointer-events-none"
