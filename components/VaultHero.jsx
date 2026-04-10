@@ -24,24 +24,25 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 ───────────────────────────────────────────── */
 const LAUNCH_DATE = new Date('2026-11-01T09:00:00-07:00'); // 9 AM MST
 
+function calcCountdown(target) {
+  const diff = Math.max(0, target - Date.now());
+  return {
+    days: Math.floor(diff / 86_400_000),
+    hours: Math.floor((diff % 86_400_000) / 3_600_000),
+    minutes: Math.floor((diff % 3_600_000) / 60_000),
+    seconds: Math.floor((diff % 60_000) / 1_000),
+  };
+}
+
 /* ─────────────────────────────────────────────
    COUNTDOWN HOOK
 ───────────────────────────────────────────── */
 function useCountdown(target) {
-  const calc = () => {
-    const diff = Math.max(0, target - Date.now());
-    return {
-      days:    Math.floor(diff / 86_400_000),
-      hours:   Math.floor((diff % 86_400_000) / 3_600_000),
-      minutes: Math.floor((diff % 3_600_000) / 60_000),
-      seconds: Math.floor((diff % 60_000) / 1_000),
-    };
-  };
-  const [t, setT] = useState(calc);
+  const [t, setT] = useState(() => calcCountdown(target));
   useEffect(() => {
-    const id = setInterval(() => setT(calc()), 1_000);
+    const id = setInterval(() => setT(calcCountdown(target)), 1_000);
     return () => clearInterval(id);
-  }, []);
+  }, [target]);
   return t;
 }
 
@@ -319,7 +320,53 @@ export default function VaultHero() {
   const contentRef = useRef(null);
   const scanRef    = useRef(null);
 
-  const { days, hours, minutes, seconds } = useCountdown(LAUNCH_DATE);
+  const liveCountdown = useCountdown(LAUNCH_DATE);
+  const [displayCountdown, setDisplayCountdown] = useState(() => calcCountdown(LAUNCH_DATE));
+  const [catchupComplete, setCatchupComplete] = useState(false);
+  const catchupStartedRef = useRef(false);
+
+  useEffect(() => {
+    if (!catchupStartedRef.current || catchupComplete) {
+      setDisplayCountdown(liveCountdown);
+    }
+  }, [liveCountdown, catchupComplete]);
+
+  function startCountdownCatchup() {
+    if (catchupStartedRef.current) return;
+    catchupStartedRef.current = true;
+
+    const live = calcCountdown(LAUNCH_DATE);
+    const boosted = {
+      days: live.days + 1,
+      hours: live.hours + 24,
+      minutes: live.minutes + 60,
+      seconds: live.seconds + 60,
+    };
+    const anim = { ...boosted };
+
+    setDisplayCountdown(boosted);
+
+    gsap.to(anim, {
+      days: live.days,
+      hours: live.hours,
+      minutes: live.minutes,
+      seconds: live.seconds,
+      duration: 1.15,
+      ease: 'expo.out',
+      onUpdate: () => {
+        setDisplayCountdown({
+          days: Math.max(0, Math.ceil(anim.days)),
+          hours: Math.max(0, Math.ceil(anim.hours)),
+          minutes: Math.max(0, Math.ceil(anim.minutes)),
+          seconds: Math.max(0, Math.ceil(anim.seconds)),
+        });
+      },
+      onComplete: () => {
+        setDisplayCountdown(calcCountdown(LAUNCH_DATE));
+        setCatchupComplete(true);
+      },
+    });
+  }
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -339,20 +386,62 @@ export default function VaultHero() {
         },
       });
 
-      /* ── 0 → 0.12 : Rumble / pressure build ── */
+      /* ── 0 → 0.22 : Violent quake / pressure build ── */
+      tl.set(wrapperRef.current, {
+        transformOrigin: '50% 50%',
+        force3D: true,
+      });
+
       tl.to(
-        [leftRef.current, rightRef.current],
+        wrapperRef.current,
         {
           keyframes: [
-            { x: (i) => (i === 0 ? -6 : 6),  duration: 0.02 },
-            { x: (i) => (i === 0 ? 4 : -4),   duration: 0.02 },
-            { x: (i) => (i === 0 ? -8 : 8),   duration: 0.02 },
-            { x: (i) => (i === 0 ? 5 : -5),   duration: 0.02 },
-            { x: 0,                            duration: 0.04 },
+            { x: -20, y: 10, rotation: -0.6, duration: 0.015 },
+            { x: 24, y: -12, rotation: 0.75, duration: 0.015 },
+            { x: -28, y: 14, rotation: -0.9, duration: 0.015 },
+            { x: 22, y: -10, rotation: 0.65, duration: 0.015 },
+            { x: -30, y: 16, rotation: -1.0, duration: 0.015 },
+            { x: 26, y: -14, rotation: 0.85, duration: 0.015 },
+            { x: -16, y: 9, rotation: -0.5, duration: 0.014 },
+            { x: 14, y: -8, rotation: 0.45, duration: 0.014 },
+            { x: 0, y: 0, rotation: 0, duration: 0.026 },
           ],
           ease: 'none',
         },
         0,
+      );
+
+      tl.to(
+        [leftRef.current, rightRef.current],
+        {
+          keyframes: [
+            { x: (i) => (i === 0 ? -14 : 14), duration: 0.018 },
+            { x: (i) => (i === 0 ? 10 : -10), duration: 0.018 },
+            { x: (i) => (i === 0 ? -18 : 18), duration: 0.018 },
+            { x: (i) => (i === 0 ? 12 : -12), duration: 0.018 },
+            { x: (i) => (i === 0 ? -20 : 20), duration: 0.018 },
+            { x: (i) => (i === 0 ? 9 : -9), duration: 0.018 },
+            { x: 0, duration: 0.04 },
+          ],
+          ease: 'none',
+        },
+        0,
+      );
+
+      /* ── 0.24 → 0.36 : Aftershock so the whole screen still rattles ── */
+      tl.to(
+        wrapperRef.current,
+        {
+          keyframes: [
+            { x: -12, y: 6, rotation: -0.35, duration: 0.016 },
+            { x: 13, y: -7, rotation: 0.4, duration: 0.016 },
+            { x: -10, y: 5, rotation: -0.3, duration: 0.016 },
+            { x: 8, y: -4, rotation: 0.2, duration: 0.016 },
+            { x: 0, y: 0, rotation: 0, duration: 0.03 },
+          ],
+          ease: 'none',
+        },
+        0.24,
       );
 
       /* ── 0.08 → 0.12 : Seam glow ignites ── */
@@ -400,6 +489,7 @@ export default function VaultHero() {
           stagger: 0.06,
           duration: 0.35,
           ease: 'power2.out',
+          onStart: startCountdownCatchup,
         },
         0.58,
       );
@@ -551,13 +641,13 @@ export default function VaultHero() {
               justifyContent: 'center',
             }}
           >
-            <CountUnit value={days}    label="days"    />
+            <CountUnit value={displayCountdown.days}    label="days"    />
             <div style={{ color: 'rgba(201,168,76,0.35)', fontSize: 'clamp(28px,4vw,56px)', lineHeight: 1, paddingTop: 4 }}>:</div>
-            <CountUnit value={hours}   label="hours"   />
+            <CountUnit value={displayCountdown.hours}   label="hours"   />
             <div style={{ color: 'rgba(201,168,76,0.35)', fontSize: 'clamp(28px,4vw,56px)', lineHeight: 1, paddingTop: 4 }}>:</div>
-            <CountUnit value={minutes} label="minutes" />
+            <CountUnit value={displayCountdown.minutes} label="minutes" />
             <div style={{ color: 'rgba(201,168,76,0.35)', fontSize: 'clamp(28px,4vw,56px)', lineHeight: 1, paddingTop: 4 }}>:</div>
-            <CountUnit value={seconds} label="seconds" />
+            <CountUnit value={displayCountdown.seconds} label="seconds" />
           </div>
         </div>
 
